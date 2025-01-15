@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  workflow_call:
+    outputs:
+      published:
+        description: A boolean value to indicate whether a publishing is happened or not
+        value: ${{ jobs.release.outputs.published }}
+      publishedPackages:
+        description: >
+          A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+        value: ${{ jobs.release.outputs.publishedPackages }}
+
+concurrency: changesets-release
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to create release (changesets/action)
+      id-token: write # OpenID Connect token needed for provenance
+      pull-requests: write # to create pull request (changesets/action)
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Env and Test
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - run: |
+          corepack enable
+          npm i @antfu/ni -g
+          ni
+          na run test
+
+      - name: Secrets to Envs
+        run: |
+          echo '${{ toJSON(secrets) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
+          echo 'NPM_CONFIG_PROVENANCE=true' >> $GITHUB_ENV
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        # https://github.com/changesets/action
+        uses: changesets/action@v1
+        with:
+          publish: na run release
+          commit: "chore: release"
+          title: "chore: release"

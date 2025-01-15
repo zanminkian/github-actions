@@ -1,2 +1,65 @@
 # github-actions
-Composite actions
+
+Reusable github actions.
+
+## Release Action
+
+Release npm package (based on [changesets/action](https://github.com/changesets/action)).
+
+### Highlights
+
+- ✅ Npm Provenance.
+- 📦 Support 4 package managers: `npm`, `pnpm`, `yarn` and `bun`.
+
+### Usages
+
+1. Prepare 2 scripts in the root `package.json`.
+
+```json
+{
+  "scripts": {
+    "test": "echo 'pass'", // Replace it with your own test script
+    "release": "changeset publish" // Npm package projects don't need to change it
+  }
+}
+```
+
+2. (Optional) Create a repository secret named `NPM_TOKEN` in `https://github.com/YOUR_NAME/YOUR_REPO/settings/secrets/actions`.
+
+   > Refer the [doc](https://docs.npmjs.com/creating-and-viewing-access-tokens) about npm access token.
+
+3. Create a github workflow file.
+
+```sh
+mkdir -p .github/workflows && \
+echo 'name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - prerelease
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    uses: zanminkian/github-actions/.github/workflows/release.yml@main
+    secrets: inherit' > .github/workflows/release.yml
+```
+
+4. Commit the github workflow file and push to the main branch.
+
+5. Example projects:
+   - [fenge](https://github.com/zanminkian/fenge): A TypeScript project publishing to npm.
+   - [web-ide](https://github.com/zanminkian/web-ide): A shell project publishing to Docker Hub.
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## License
+
+MIT
