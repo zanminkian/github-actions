@@ -13,13 +13,16 @@ Release npm package (based on [changesets/action](https://github.com/changesets/
 
 ### Usages
 
-1. Prepare 2 scripts in the root `package.json`.
+1. Prepare 2 scripts and `engines.node` in the root `package.json`.
 
 ```json
 {
   "scripts": {
     "test": "echo 'pass'", // Replace it with your own test script
     "release": "changeset publish" // Npm package projects don't need to change it
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
 ```
