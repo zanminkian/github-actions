@@ -9,7 +9,7 @@ Release npm package (based on [changesets/action](https://github.com/changesets/
 ### Highlights
 
 - ✅ Npm Provenance.
-- 📦 Support 4 package managers: `npm`, `pnpm`, `yarn` and `bun`.
+- 📦 Support 4 package managers: `npm`, `pnpm`, and `yarn`.
 
 ### Usages
 
@@ -49,7 +49,7 @@ jobs:
       contents: write
       id-token: write
       pull-requests: write
-    uses: zanminkian/github-actions/.github/workflows/release.yml@main
+    uses: zanminkian/github-actions/.github/workflows/release.yml@v1
     secrets: inherit' > .github/workflows/release.yml
 ```
 
@@ -57,6 +57,7 @@ jobs:
 
 5. Example projects:
    - [fenge](https://github.com/zanminkian/fenge): A TypeScript project publishing to npm.
+   - [@rnm/tscx](https://github.com/rnmjs/tscx): A tiny tsc wrapper with many convenient options.
    - [web-ide](https://github.com/zanminkian/web-ide): A shell project publishing to Docker Hub.
 
 ## Show your support
