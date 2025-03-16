@@ -19,7 +19,7 @@ Release npm package (based on [changesets/action](https://github.com/changesets/
 {
   "scripts": {
     "test": "echo 'pass'", // Replace it with your own test script
-    "release": "changeset publish" // Npm package projects don't need to change it
+    "release": "pnpm -r publish && changeset tag" // Replace `pnpm -r publish` with your own publish script
   },
   "engines": {
     "node": ">=22.0.0"

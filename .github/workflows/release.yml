@@ -33,11 +33,12 @@ jobs:
         with:
           node-version-file: 'package.json' # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
       - run: |
-          # TODO: Remove it once corepack is stable
-          corepack enable
-          npm i @antfu/ni -g
-          ni
-          na run test
+          npm i @rnm/pm -g
+
+      - name: Setup project
+        run: |
+          pm install
+          pm run test
 
       - name: Secrets to Envs
         run: |
@@ -50,6 +51,6 @@ jobs:
         # https://github.com/changesets/action
         uses: changesets/action@v1
         with:
-          publish: na run release
+          publish: pm run release
           commit: "chore: release"
           title: "chore: release"
