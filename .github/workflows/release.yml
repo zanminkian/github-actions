@@ -35,7 +35,7 @@ jobs:
       - name: Setup Node.js Env and Test
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json' # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
+          node-version-file: "package.json" # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
       - run: |
           npm i @rnm/pm -g
 
