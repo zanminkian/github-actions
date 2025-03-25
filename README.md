@@ -27,9 +27,12 @@ Release npm package (based on [changesets/action](https://github.com/changesets/
 }
 ```
 
-2. (Optional) Create a repository secret named `NPM_TOKEN` in `https://github.com/YOUR_NAME/YOUR_REPO/settings/secrets/actions`.
+2. Create a repository secret named `TOKENS` in `https://github.com/YOUR_NAME/YOUR_REPO/settings/secrets/actions`. It is a JSON string. Each key-value pair will become an environment variable. For example:
 
-   > Refer the [doc](https://docs.npmjs.com/creating-and-viewing-access-tokens) about npm access token.
+```json
+{"NPM_TOKEN": "your_npm_token"}
+```
+
 
 3. Create a github workflow file.
 
@@ -50,7 +53,8 @@ jobs:
       id-token: write
       pull-requests: write
     uses: zanminkian/github-actions/.github/workflows/release.yml@v1
-    secrets: inherit' > .github/workflows/release.yml
+    secrets:
+      TOKENS: ${{ secrets.TOKENS }}' > .github/workflows/release.yml
 ```
 
 4. Commit the github workflow file and push to the main branch.

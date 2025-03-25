@@ -10,6 +10,10 @@ on:
         description: >
           A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
         value: ${{ jobs.release.outputs.publishedPackages }}
+    secrets:
+      TOKENS:
+        description: JSON string of tokens. Each key-value pair will become an environment variable
+        required: true
 
 concurrency: changesets-release
 
@@ -44,7 +48,7 @@ jobs:
 
       - name: Secrets to Envs
         run: |
-          echo '${{ toJSON(secrets) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
           echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
           echo 'NPM_CONFIG_PROVENANCE=true' >> $GITHUB_ENV
 
