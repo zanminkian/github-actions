@@ -48,6 +48,7 @@ jobs:
 
       - name: Secrets to Envs
         run: |
+          echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.value)"' | while read value; do echo "::add-mask::$value"; done
           echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
           echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
           echo 'NPM_CONFIG_PROVENANCE=true' >> $GITHUB_ENV
