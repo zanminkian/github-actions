@@ -39,12 +39,11 @@ jobs:
       - run: |
           npm i @rnm/pm -g
 
-      # TODO: Optimize `exit $(git status --porcelain | wc -l)`
       - name: Setup project
         run: |
           pm install
           pm run test
-          exit $(git status --porcelain | wc -l)
+          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then echo "Error: Git status is not clean"; git status; exit 1; fi
 
       - name: Secrets to Envs
         run: |
