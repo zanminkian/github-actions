@@ -26,7 +26,7 @@ Specify a compatible Node.js version and define necessary scripts in your `packa
   },
   "scripts": {
     "test": "echo 'pass'", // Replace with your actual test script
-    "release": "pnpm -r publish && changeset tag" // Replace `pnpm -r publish` with your actual publish script
+    "release": "pnpm -r publish" // Replace with your actual publish script
   }
 }
 ```

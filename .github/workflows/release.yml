@@ -62,7 +62,7 @@ jobs:
         # https://github.com/changesets/action
         uses: changesets/action@v1
         with:
-          publish: pm run release
+          publish: "pm run release && ./node_modules/.bin/changeset tag"
           commit: "chore: release"
           title: "chore: release"
 
