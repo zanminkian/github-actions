@@ -23,8 +23,22 @@ on:
 concurrency: changesets-release
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+      - run: |
+          npm i @rnm/pm -g
+          pm install
+          pm run test
+          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then echo "Error: Git status is not clean"; git status; exit 1; fi
   release:
     name: Release
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write # to create release (changesets/action)
@@ -34,21 +48,13 @@ jobs:
       published: ${{ steps.changesets.outputs.published }}
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js Env and Test
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json" # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
       - run: |
           npm i @rnm/pm -g
-
-      - name: Setup project
-        run: |
           pm install
-          pm run test
-          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then echo "Error: Git status is not clean"; git status; exit 1; fi
 
       - name: Secrets to Envs
         run: |
