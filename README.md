@@ -50,10 +50,8 @@ Add a workflow file in `.github/workflows/`. Example configuration:
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-      - prerelease
+  - push
+  - pull_request
 
 jobs:
   release:
