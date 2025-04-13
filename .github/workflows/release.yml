@@ -64,12 +64,15 @@ jobs:
           echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
           echo 'NPM_CONFIG_PROVENANCE=true' >> $GITHUB_ENV
 
+      - name: Create Publish Script
+        run: echo 'pm run release && ./node_modules/.bin/changeset tag' > /tmp/zanminkian_publish.sh
+
       - name: Create Release Pull Request or Publish
         id: changesets
         # https://github.com/changesets/action
         uses: changesets/action@v1
         with:
-          publish: "pm run release && ./node_modules/.bin/changeset tag"
+          publish: "sh /tmp/zanminkian_publish.sh"
           commit: "chore: release"
           title: "chore: release"
 
