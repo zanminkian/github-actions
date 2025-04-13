@@ -2,12 +2,13 @@
 
 A collection of reusable GitHub Actions for automating your workflows.
 
-## Release Action
+## All-in-One Action
 
-This action automates the process of releasing your project's distribution to platforms such as npm, Docker Hub, and others. It is built on top of [changesets/action](https://github.com/changesets/action) and includes support for NPM Provenance and multiple package managers.
+Use only one workflow file to automate your entire test and release process.
 
 ### Key Features
 
+- 🦋 **Powered by Changesets**: Seamless use this action if the project uses [changesets](https://github.com/changesets/changesets).
 - 🛡️ **NPM Provenance**: Ensures secure and verifiable releases.
 - 📦 **Package Manager Support**: Supports `npm`, `pnpm`, and `yarn`.
 - 🛠️ **Customizable Scripts**: Allows defining custom scripts for testing and publishing in your `package.json`.
@@ -17,7 +18,7 @@ This action automates the process of releasing your project's distribution to pl
 
 #### 1. **Configure Node.js Version and Define Publishing Scripts**
 
-Specify a compatible Node.js version and define necessary scripts in your `package.json`. Example:
+Specify a compatible Node.js version by `engines` and define `test` and  `release` scripts in your `package.json`. Example:
 
 ```json
 {
@@ -47,26 +48,26 @@ Create a repository secret named `TOKENS` in your GitHub repository settings und
 Add a workflow file in `.github/workflows/`. Example configuration:
 
 ```yaml
-name: Release
+name: CI
 
 on:
   - push
   - pull_request
 
 jobs:
-  release:
+  ci:
     permissions:
       contents: write
       id-token: write
       pull-requests: write
-    uses: zanminkian/github-actions/.github/workflows/release.yml@v2
+    uses: zanminkian/github-actions/.github/workflows/all-in-one.yml@v3
     secrets:
       TOKENS: ${{ secrets.TOKENS }}
 ```
 
 #### 4. **Commit and Push**
 
-Commit the workflow file and push it to the configured branch (`main` or `prerelease`). The workflow will run automatically when changes are pushed to the configured branches.
+Commit the workflow file and push it to the default branch. Each push will trigger the test process, while only pushes to the `main` and `prerelease` branch may trigger the release process.
 
 ### Troubleshooting
 
