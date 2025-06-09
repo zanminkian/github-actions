@@ -29,10 +29,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
-      - run: |
+      - name: Check .changeset/config.json
+        run: |
+          if [ "$(jq -e '.baseBranch' .changeset/config.json)" != "\"main\"" ]; then
+            echo "Error: .changeset/config.json baseBranch should be \"main\""
+            exit 1
+          fi
+          if [ "$(jq -e '.privatePackages.version' .changeset/config.json)" != true ]; then
+            echo "Error: .changeset/config.json privatePackages.version should be true"
+            exit 1
+          fi
+          if [ "$(jq -e '.privatePackages.tag' .changeset/config.json)" != true ]; then
+            echo "Error: .changeset/config.json privatePackages.tag should be true"
+            exit 1
+          fi
+      - name: Install and test
+        run: |
           npm i @rnm/pm -g
           pm install
           pm run test
+      - name: Check git status
+        run: |
           if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then echo "Error: Git status is not clean"; git status; exit 1; fi
   release:
     name: Release
