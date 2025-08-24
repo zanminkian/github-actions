@@ -46,6 +46,7 @@ jobs:
       - name: Install and test
         run: |
           npm i @rnm/pm -g
+          pm-cli enable-shim
           pm install
           pm run test
       - name: Check git status
@@ -72,6 +73,7 @@ jobs:
           node-version-file: "package.json" # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
       - run: |
           npm i @rnm/pm -g
+          pm-cli enable-shim
           pm install
 
       - name: Secrets to Envs
