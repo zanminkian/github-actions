@@ -81,12 +81,12 @@ jobs:
           echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.value)"' | while read value; do echo "::add-mask::$value"; done
           echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
           echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
-          echo 'NPM_CONFIG_PROVENANCE=true' >> $GITHUB_ENV
 
       - name: Create Publish Script
         run: |
           echo '#!/usr/bin/env bash' > /tmp/zanminkian_publish.sh
           echo 'set -ex' >> /tmp/zanminkian_publish.sh
+          echo 'export NPM_CONFIG_PROVENANCE=true' >> /tmp/zanminkian_publish.sh
           echo 'export NPM_CONFIG_TAG=$(test -f ".changeset/pre.json" && jq -r ".tag" .changeset/pre.json || echo "latest")' >> /tmp/zanminkian_publish.sh
           echo 'pm run release' >> /tmp/zanminkian_publish.sh
           echo './node_modules/.bin/changeset tag' >> /tmp/zanminkian_publish.sh
