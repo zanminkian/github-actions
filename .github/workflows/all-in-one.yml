@@ -18,7 +18,7 @@ on:
     secrets:
       TOKENS:
         description: JSON string of tokens. Each key-value pair will become an environment variable
-        required: true
+        required: false
 
 jobs:
   test:
@@ -78,8 +78,12 @@ jobs:
 
       - name: Secrets to Envs
         run: |
-          echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.value)"' | while read value; do echo "::add-mask::$value"; done
-          echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          if [ "${{ secrets.TOKENS }}" != "" ]; then
+            echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.value)"' | while read value; do echo "::add-mask::$value"; done
+            echo ${{ toJSON(secrets.TOKENS) }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          else
+            echo "No TOKENS provided, skipping token setup"
+          fi
           echo 'GITHUB_TOKEN=${{ secrets.github_token }}' >> $GITHUB_ENV
 
       - name: Create Publish Script

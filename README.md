@@ -32,9 +32,11 @@ Specify a compatible Node.js version by `engines` and define `test` and  `releas
 }
 ```
 
-#### 2. **Set Up Secrets**
+#### 2. **Set Up Secrets (Optional)**
 
-Create a repository secret named `TOKENS` in your GitHub repository settings under `Settings > Secrets > Actions`. This should be a JSON string where each key-value pair becomes an environment variable during the release process. Example:
+Create a repository secret named `TOKENS` in your GitHub repository settings under `Settings > Secrets > Actions` if you need additional authentication tokens for publishing. This should be a JSON string where each key-value pair becomes an environment variable during the release process.
+
+Example:
 
 ```json
 {
@@ -62,7 +64,7 @@ jobs:
       pull-requests: write
     uses: zanminkian/github-actions/.github/workflows/all-in-one.yml@v3
     secrets:
-      TOKENS: ${{ secrets.TOKENS }}
+      TOKENS: ${{ secrets.TOKENS }} # optional
 ```
 
 #### 4. **Commit and Push**
