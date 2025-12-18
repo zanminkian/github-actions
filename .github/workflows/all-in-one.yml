@@ -86,6 +86,7 @@ jobs:
         run: |
           echo '#!/usr/bin/env bash' > /tmp/zanminkian_publish.sh
           echo 'set -ex' >> /tmp/zanminkian_publish.sh
+          echo 'export NPM_CONFIG_GIT_CHECKS=false' >> /tmp/zanminkian_publish.sh
           echo 'export NPM_CONFIG_PROVENANCE=true' >> /tmp/zanminkian_publish.sh
           echo 'export NPM_CONFIG_TAG=$(test -f ".changeset/pre.json" && jq -r ".tag" .changeset/pre.json || echo "latest")' >> /tmp/zanminkian_publish.sh
           echo 'pm run release' >> /tmp/zanminkian_publish.sh
