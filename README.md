@@ -18,12 +18,15 @@ Use only one workflow file to automate your entire test and release process.
 
 #### 1. **Configure Node.js Version and Define Publishing Scripts**
 
-Specify a compatible Node.js version by `engines` and define `test` and  `release` scripts in your `package.json`. Example:
+Specify a compatible Node.js version by `devEngines` and define `test` and  `release` scripts in your `package.json`. Example:
 
 ```json
 {
-  "engines": {
-    "node": ">=22.0.0"
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22.0.0"
+    }
   },
   "scripts": {
     "test": "echo 'pass'", // Replace with your actual test script
@@ -75,7 +78,7 @@ Commit the workflow file and push it to the default branch. Each push will trigg
 
 - **Git Status Not Clean**: Ensure all changes are committed before running the workflow.
 - **Missing Secrets**: Verify that the `TOKENS` secret is correctly set in your repository settings.
-- **Incompatible Node.js Version**: Update the `engines.node` field in your `package.json`.
+- **Incompatible Node.js Version**: Update the `devEngines.runtime.version` field in your `package.json`.
 
 ### Example Projects
 

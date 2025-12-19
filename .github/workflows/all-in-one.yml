@@ -26,9 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # TODO: Remove this step when https://github.com/actions/setup-node/pull/1283 is merged
+      - name: Get Node.js version
+        id: get-node-version
+        run: |
+          node_version=$(jq -r '.devEngines.runtime.version // empty' package.json)
+          if [ -z "$node_version" ]; then
+            echo "Error: No Node.js version specified in devEngines.runtime.version"
+            exit 1
+          fi
+          echo "node-version=$node_version" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v4
         with:
-          node-version-file: "package.json"
+          node-version: ${{ steps.get-node-version.outputs.node-version }}
       - name: Check .changeset/config.json
         run: |
           if [ "$(jq -e '.baseBranch' .changeset/config.json)" != "\"main\"" ]; then
@@ -68,9 +78,19 @@ jobs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - uses: actions/checkout@v4
+      # TODO: Remove this step when https://github.com/actions/setup-node/pull/1283 is merged
+      - name: Get Node.js version
+        id: get-node-version
+        run: |
+          node_version=$(jq -r '.devEngines.runtime.version // empty' package.json)
+          if [ -z "$node_version" ]; then
+            echo "Error: No Node.js version specified in devEngines.runtime.version"
+            exit 1
+          fi
+          echo "node-version=$node_version" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v4
         with:
-          node-version-file: "package.json" # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
+          node-version: ${{ steps.get-node-version.outputs.node-version }}
       - run: |
           npm i @rnm/pm -g
           pm-cli enable-shim
