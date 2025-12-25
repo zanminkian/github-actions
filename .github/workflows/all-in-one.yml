@@ -93,48 +93,22 @@ jobs:
           # Execute the script
           deno run --allow-net --allow-read --allow-write --allow-env /tmp/version-resolver.js
 
-  test-min-version:
-    name: Test (Min Node.js)
+  test:
+    name: Test (Node.js ${{ matrix.node-version-type }})
     needs: prepare-versions
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - node-version-type: "Min"
+            node-version: ${{ needs.prepare-versions.outputs.min-version }}
+          - node-version-type: "Max"
+            node-version: ${{ needs.prepare-versions.outputs.max-version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.prepare-versions.outputs.min-version }}
-      - name: Check .changeset/config.json
-        run: |
-          if [ "$(jq -e '.baseBranch' .changeset/config.json)" != "\"main\"" ]; then
-            echo "Error: .changeset/config.json baseBranch should be \"main\""
-            exit 1
-          fi
-          if [ "$(jq -e '.privatePackages.version' .changeset/config.json)" != true ]; then
-            echo "Error: .changeset/config.json privatePackages.version should be true"
-            exit 1
-          fi
-          if [ "$(jq -e '.privatePackages.tag' .changeset/config.json)" != true ]; then
-            echo "Error: .changeset/config.json privatePackages.tag should be true"
-            exit 1
-          fi
-      - name: Install and test
-        run: |
-          npm i @rnm/pm -g
-          pm-cli enable-shim
-          pm install
-          pm run test
-      - name: Check git status
-        run: |
-          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then echo "Error: Git status is not clean"; git status; exit 1; fi
-
-  test-max-version:
-    name: Test (Max Node.js)
-    needs: prepare-versions
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ needs.prepare-versions.outputs.max-version }}
+          node-version: ${{ matrix.node-version }}
       - name: Check .changeset/config.json
         run: |
           if [ "$(jq -e '.baseBranch' .changeset/config.json)" != "\"main\"" ]; then
@@ -161,7 +135,7 @@ jobs:
   release:
     name: Release
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
-    needs: [test-min-version, test-max-version]
+    needs: [test]
     runs-on: ubuntu-latest
     concurrency:
       group: changesets-release # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/control-the-concurrency-of-workflows-and-jobs
