@@ -21,12 +21,11 @@ on:
         required: false
 
 jobs:
-  prepare-versions:
-    name: Prepare Node.js Versions
+  prepare-test-matrix:
+    name: Prepare Test Matrix
     runs-on: ubuntu-latest
     outputs:
-      min-version: ${{ steps.resolve-versions.outputs.min-version }}
-      max-version: ${{ steps.resolve-versions.outputs.max-version }}
+      test-matrix: ${{ steps.resolve-versions.outputs.test-matrix }}
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
@@ -74,16 +73,38 @@ jobs:
             }
             const minVersion = satisfyingVersions[0];
             const maxVersion = satisfyingVersions[satisfyingVersions.length - 1];
-            console.log(`Min version: ${minVersion}, Max version: ${maxVersion}`);
+            const versionsSame = minVersion === maxVersion;
+            console.log(
+              `Min version: ${minVersion}, Max version: ${maxVersion}, Same: ${versionsSame}`,
+            );
 
-            // 3. Write to GITHUB_OUTPUT
+            // 3. Generate test matrix
+            const include = versionsSame
+              ? [
+                  {
+                    "node-version": minVersion,
+                    "version-label": minVersion,
+                  },
+                ]
+              : [
+                  {
+                    "node-version": minVersion,
+                    "version-label": `${minVersion} (min)`,
+                  },
+                  {
+                    "node-version": maxVersion,
+                    "version-label": `${maxVersion} (max)`,
+                  },
+                ];
+
+            // 4. Write to GITHUB_OUTPUT
             const githubOutput = Deno.env.get("GITHUB_OUTPUT");
             if (githubOutput) {
-              const outputs = [
-                `min-version=${minVersion}`,
-                `max-version=${maxVersion}`,
-              ].join("\n");
-              await Deno.writeTextFile(githubOutput, outputs + "\n", { append: true });
+              await Deno.writeTextFile(
+                githubOutput,
+                `test-matrix=${JSON.stringify({ matrix: { include } })}\n`,
+                { append: true },
+              );
             }
           }
 
@@ -94,16 +115,10 @@ jobs:
           deno run --allow-net --allow-read --allow-write --allow-env /tmp/version-resolver.js
 
   test:
-    name: Test (Node.js ${{ matrix.node-version-type }})
-    needs: prepare-versions
+    name: Test (Node.js ${{ matrix.version-label }})
+    needs: prepare-test-matrix
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - node-version-type: "Min"
-            node-version: ${{ needs.prepare-versions.outputs.min-version }}
-          - node-version-type: "Max"
-            node-version: ${{ needs.prepare-versions.outputs.max-version }}
+    strategy: ${{ fromJSON(needs.prepare-test-matrix.outputs.test-matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -135,7 +150,7 @@ jobs:
   release:
     name: Release
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
-    needs: [test]
+    needs: test
     runs-on: ubuntu-latest
     concurrency:
       group: changesets-release # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/control-the-concurrency-of-workflows-and-jobs
