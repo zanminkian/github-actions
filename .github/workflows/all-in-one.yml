@@ -220,9 +220,13 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.github_token }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/zanminkian/web-ide/releases/tags/v$version" | jq -r ".id"
+              "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version" | jq -r ".id"
           )
           echo "release id is $release_id"
+          if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
+            echo "Error: Failed to get release ID. Release may not exist for version $version"
+            exit 1
+          fi
 
           for file in $(ls ${{ inputs.assets }}); do
             echo "${{ inputs.assets }}/$file"
@@ -232,6 +236,6 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.github_token }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               -H "Content-Type: application/octet-stream" \
-              "https://uploads.github.com/repos/zanminkian/web-ide/releases/$release_id/assets?name=$file" \
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$file" \
               -T "${{ inputs.assets }}/$file" >/dev/null 2>&1
           done
