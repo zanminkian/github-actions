@@ -41,11 +41,17 @@ jobs:
           async function resolveVersions() {
             // 1. Get the version range
             const packageJson = JSON.parse(await Deno.readTextFile("package.json"));
-            const isNode = packageJson?.devEngines?.runtime?.name === "node";
-            if (!isNode) {
+            // Handle both single runtime object and array of runtime objects
+            const runtimes = Array.isArray(packageJson?.devEngines?.runtime)
+              ? packageJson.devEngines.runtime
+              : packageJson?.devEngines?.runtime
+                ? [packageJson.devEngines.runtime]
+                : [];
+            const nodeRuntime = runtimes.find((runtime) => runtime?.name === "node");
+            if (!nodeRuntime) {
               throw new Error("Not a Node.js project");
             }
-            const versionRange = packageJson?.devEngines?.runtime?.version;
+            const versionRange = nodeRuntime.version;
             if (!versionRange) {
               throw new Error(
                 "No Node.js version specified in devEngines.runtime.version",
@@ -167,7 +173,14 @@ jobs:
       - name: Get Node.js version
         id: get-node-version
         run: |
-          node_version=$(jq -r '.devEngines.runtime.version // empty' package.json)
+          # Handle both single runtime object and array of runtime objects
+          node_version=$(jq -r '
+            if (.devEngines.runtime | type) == "array" then
+              (.devEngines.runtime[] | select(.name == "node") | .version) // empty
+            else
+              (if .devEngines.runtime.name == "node" then .devEngines.runtime.version else empty end)
+            end
+          ' package.json)
           if [ -z "$node_version" ]; then
             echo "Error: No Node.js version specified in devEngines.runtime.version"
             exit 1
