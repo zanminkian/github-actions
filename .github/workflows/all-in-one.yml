@@ -147,7 +147,7 @@ jobs:
       - name: Install and test
         run: |
           npm i @rnm/pm -g
-          pm-cli enable-shim
+          pm-util enable-shim
           pm install
           pm run test
       - name: Check git status
@@ -191,7 +191,7 @@ jobs:
           node-version: ${{ steps.get-node-version.outputs.node-version }}
       - run: |
           npm i @rnm/pm -g
-          pm-cli enable-shim
+          pm-util enable-shim
           pm install
 
       - name: Secrets to Envs
