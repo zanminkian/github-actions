@@ -127,7 +127,7 @@ jobs:
     strategy: ${{ fromJSON(needs.prepare-test-matrix.outputs.test-matrix) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Check .changeset/config.json
@@ -169,26 +169,9 @@ jobs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - uses: actions/checkout@v4
-      # TODO: Remove this step when https://github.com/actions/setup-node/pull/1283 is merged
-      - name: Get Node.js version
-        id: get-node-version
-        run: |
-          # Handle both single runtime object and array of runtime objects
-          node_version=$(jq -r '
-            if (.devEngines.runtime | type) == "array" then
-              (.devEngines.runtime[] | select(.name == "node") | .version) // empty
-            else
-              (if .devEngines.runtime.name == "node" then .devEngines.runtime.version else empty end)
-            end
-          ' package.json)
-          if [ -z "$node_version" ]; then
-            echo "Error: No Node.js version specified in devEngines.runtime.version"
-            exit 1
-          fi
-          echo "node-version=$node_version" >> $GITHUB_OUTPUT
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ steps.get-node-version.outputs.node-version }}
+          node-version-file: package.json
       - run: |
           npm i @rnm/pm -g
           pm-util enable-shim
