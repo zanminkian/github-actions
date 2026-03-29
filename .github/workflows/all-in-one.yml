@@ -27,7 +27,7 @@ jobs:
     outputs:
       test-matrix: ${{ steps.resolve-versions.outputs.test-matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: denoland/setup-deno@v2
         with:
           deno-version: lts
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy: ${{ fromJSON(needs.prepare-test-matrix.outputs.test-matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
@@ -142,7 +142,7 @@ jobs:
       published: ${{ steps.changesets.outputs.published }}
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: package.json
