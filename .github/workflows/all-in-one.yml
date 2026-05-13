@@ -163,13 +163,19 @@ jobs:
 
       - name: Create Publish Script
         run: |
-          echo '#!/usr/bin/env bash' > /tmp/zanminkian_publish.sh
-          echo 'set -ex' >> /tmp/zanminkian_publish.sh
-          echo 'export NPM_CONFIG_GIT_CHECKS=false' >> /tmp/zanminkian_publish.sh
-          echo 'export NPM_CONFIG_PROVENANCE=true' >> /tmp/zanminkian_publish.sh
-          echo 'export NPM_CONFIG_TAG=$(test -f ".changeset/pre.json" && jq -r ".tag" .changeset/pre.json || echo "latest")' >> /tmp/zanminkian_publish.sh
-          echo 'pm run release' >> /tmp/zanminkian_publish.sh
-          echo './node_modules/.bin/changeset tag' >> /tmp/zanminkian_publish.sh
+          cat << 'SCRIPT' > /tmp/zanminkian_publish.sh
+          #!/usr/bin/env bash
+          set -ex
+          if [ "$(git log -1 --format=%s)" != "chore: release" ]; then
+            echo "Latest commit is not \"chore: release\", skip publish"
+            exit 0
+          fi
+          export NPM_CONFIG_GIT_CHECKS=false
+          export NPM_CONFIG_PROVENANCE=true
+          export NPM_CONFIG_TAG=$(test -f ".changeset/pre.json" && jq -r ".tag" .changeset/pre.json || echo "latest")
+          pm run release
+          ./node_modules/.bin/changeset tag
+          SCRIPT
 
       - name: Create Release Pull Request or Publish
         id: changesets
