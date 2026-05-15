@@ -18,7 +18,7 @@ Use only one workflow file to automate your entire test and release process.
 
 #### 1. **Configure Node.js Version and Define Publishing Scripts**
 
-Specify a compatible Node.js version by `devEngines` and define `test` and  `release` scripts in your `package.json`. Example:
+Specify a compatible Node.js version by `devEngines` and define `test`, `build`, and `release` scripts in your `package.json`. Example:
 
 ```json
 {
@@ -29,6 +29,7 @@ Specify a compatible Node.js version by `devEngines` and define `test` and  `rel
     }
   },
   "scripts": {
+    "build": "tsc -p .", // Replace with your actual build script
     "test": "echo 'pass'", // Replace with your actual test script
     "release": "pnpm -r publish" // Replace with your actual publish script
   }

@@ -127,10 +127,33 @@ jobs:
             git diff
             exit 1
           fi
+
+  build:
+    name: Build
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+      - run: |
+          npm i @rnm/pm -g
+          pm-util enable-shim
+          pm install
+          pm run build
+      - name: Upload Assets
+        if: ${{ inputs.assets != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: ${{ inputs.assets }}
+
   release:
     name: Release
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     concurrency:
       group: changesets-release # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/control-the-concurrency-of-workflows-and-jobs
@@ -186,6 +209,12 @@ jobs:
           commit: "chore: release"
           title: "chore: release"
 
+      - name: Download Assets
+        if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') }}
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: ${{ inputs.assets }}
       - name: Upload Release Assets
         if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') }}
         run: |
