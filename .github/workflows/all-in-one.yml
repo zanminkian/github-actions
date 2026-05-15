@@ -7,6 +7,11 @@ on:
         description: A directory path to release assets
         type: string
         required: false
+      builds-on:
+        description: A JSON array of OSes to run the build job on, e.g. '["ubuntu-latest", "windows-latest"]'
+        type: string
+        default: '[]'
+        required: false
     outputs:
       published:
         description: A boolean value to indicate whether a publishing is happened or not
@@ -129,10 +134,13 @@ jobs:
           fi
 
   build:
-    name: Build
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
+    name: Build (${{ matrix.os }})
+    if: ${{ inputs.builds-on != '[]' }}
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ${{ fromJSON(inputs.builds-on) }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -147,12 +155,12 @@ jobs:
         if: ${{ inputs.assets != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: release-assets
+          name: release-assets-${{ matrix.os }}
           path: ${{ inputs.assets }}
 
   release:
     name: Release
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
+    if: ${{ (needs.build.result == 'success' || needs.build.result == 'skipped') && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
     needs: build
     runs-on: ubuntu-latest
     concurrency:
@@ -210,10 +218,11 @@ jobs:
           title: "chore: release"
 
       - name: Download Assets
-        if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') }}
+        if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') && (inputs.builds-on != '[]') }}
         uses: actions/download-artifact@v4
         with:
-          name: release-assets
+          pattern: release-assets-*
+          merge-multiple: true
           path: ${{ inputs.assets }}
       - name: Upload Release Assets
         if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') }}

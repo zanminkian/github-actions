@@ -11,7 +11,8 @@ Use only one workflow file to automate your entire test and release process.
 - 🦋 **Powered by Changesets**: Seamless use this action if the project uses [changesets](https://github.com/changesets/changesets).
 - 🛡️ **NPM Provenance**: Ensures secure and verifiable releases.
 - 📦 **Package Manager Support**: Supports `npm`, `pnpm`, and `yarn`.
-- 🛠️ **Customizable Scripts**: Allows defining custom scripts for testing and publishing in your `package.json`.
+- 🛠️ **Customizable Scripts**: Allows defining custom scripts for testing, building, and publishing in your `package.json`.
+- 🏗️ **Cross-Platform Build**: Supports running the build job on multiple operating systems via the `builds-on` parameter.
 - 🔐 **Secret Management**: Simplifies secret management through environment variables.
 
 ### Setup Guide
@@ -67,9 +68,15 @@ jobs:
       id-token: write
       pull-requests: write
     uses: zanminkian/github-actions/.github/workflows/all-in-one.yml@v3
+    with:
+      builds-on: '["ubuntu-latest"]' # optional, e.g. '["ubuntu-latest", "windows-latest"]'
+      # assets: dist # optional, a directory path to release assets
     secrets:
       TOKENS: ${{ secrets.TOKENS }} # optional
 ```
+
+- `builds-on` — A JSON array of OS names to run the build job on. If omitted, the build job is skipped entirely. Useful for cross-platform native addons or binaries.
+- `assets` — A directory path containing release assets to attach to the GitHub release. When used together with `builds-on`, assets from all build matrix jobs are merged.
 
 #### 4. **Commit and Push**
 
