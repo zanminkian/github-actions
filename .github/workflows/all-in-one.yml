@@ -164,7 +164,7 @@ jobs:
 
   release:
     name: Release
-    if: ${{ (needs.build.result == 'success' || needs.build.result == 'skipped') && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
+    if: ${{ !failure() && !cancelled() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') }}
     needs: build
     runs-on: ubuntu-latest
     concurrency:
