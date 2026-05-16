@@ -142,6 +142,8 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(inputs.builds-on) }}
+    outputs:
+      assets-uploaded: ${{ steps.upload.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -153,6 +155,7 @@ jobs:
           pm install
           pm run build
       - name: Upload Assets
+        id: upload
         if: ${{ inputs.assets != '' }}
         uses: actions/upload-artifact@v4
         with:
@@ -218,17 +221,23 @@ jobs:
           commit: "chore: release"
           title: "chore: release"
 
+  upload-release-assets:
+    name: Upload Release Assets
+    if: ${{ needs.build.outputs.assets-uploaded == 'true' && needs.release.outputs.published == 'true' }}
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
       - name: Download Assets
-        if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') && (inputs.builds-on != '[]') }}
         uses: actions/download-artifact@v4
         with:
           pattern: release-assets-*
           merge-multiple: true
           path: ${{ inputs.assets }}
       - name: Upload Release Assets
-        if: ${{ (inputs.assets != '') && (steps.changesets.outputs.published == 'true') }}
         run: |
-          version=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+          version=$(echo '${{ needs.release.outputs.publishedPackages }}' | jq -r '.[0].version')
           echo "published version is $version"
           release_id=$(
             curl -L \
