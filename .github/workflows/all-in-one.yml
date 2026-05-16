@@ -133,9 +133,10 @@ jobs:
             exit 1
           fi
 
+  # Build release assets for the release job below. Not for verifying the build process — skipped when no release will be published.
   build:
     name: Build (${{ matrix.os }})
-    if: ${{ inputs.builds-on != '[]' }}
+    if: ${{ inputs.builds-on != '[]' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prerelease') && startsWith(github.event.head_commit.message, 'chore: release') }}
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
